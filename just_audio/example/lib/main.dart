@@ -44,8 +44,7 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
     // Try to load audio from a source and catch any errors.
     try {
       // AAC example: https://dl.espressif.com/dl/audio/ff-16b-2c-44100hz.aac
-      await _player.setAudioSource(AudioSource.uri(Uri.parse(
-          "https://s3.amazonaws.com/scifri-episodes/scifri20181123-episode.mp3")));
+      await _player.setAudioSource(AudioSource.asset("audio/M4ALoop14.m4a"));
     } catch (e) {
       print("Error loading audio source: $e");
     }
@@ -86,28 +85,8 @@ class MyAppState extends State<MyApp> with WidgetsBindingObserver {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: SafeArea(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Display play/pause button and volume/speed sliders.
-              ControlButtons(_player),
-              // Display seek bar. Using StreamBuilder, this widget rebuilds
-              // each time the position, buffered position or duration changes.
-              StreamBuilder<PositionData>(
-                stream: _positionDataStream,
-                builder: (context, snapshot) {
-                  final positionData = snapshot.data;
-                  return SeekBar(
-                    duration: positionData?.duration ?? Duration.zero,
-                    position: positionData?.position ?? Duration.zero,
-                    bufferedPosition:
-                        positionData?.bufferedPosition ?? Duration.zero,
-                    onChangeEnd: _player.seek,
-                  );
-                },
-              ),
-            ],
+          child: Center(
+            child: ControlButtons(_player),
           ),
         ),
       ),
@@ -165,7 +144,9 @@ class ControlButtons extends StatelessWidget {
               return IconButton(
                 icon: const Icon(Icons.play_arrow),
                 iconSize: 64.0,
-                onPressed: player.play,
+                onPressed: () {
+                  player..setLoopMode(LoopMode.all)..play();
+                },
               );
             } else if (processingState != ProcessingState.completed) {
               return IconButton(
